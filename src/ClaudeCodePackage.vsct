@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+
+  <Commands package="guidClaudeCodePackage">
+    <Groups>
+      <Group guid="guidClaudeCodeCmdSet" id="MainMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+      <Group guid="guidClaudeCodeCmdSet" id="EditorContextGroup" priority="0x0100">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidClaudeCodeCmdSet" id="cmdidOpenToolWindow" priority="0x0100" type="Button">
+        <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
+        <Strings>
+          <ButtonText>Open Claude Code Panel</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidClaudeCodeCmdSet" id="cmdidOpenTerminalWithClaude" priority="0x0110" type="Button">
+        <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
+        <Strings>
+          <ButtonText>Start Claude Code in Terminal</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidClaudeCodeCmdSet" id="cmdidAddSelectionToClaude" priority="0x0200" type="Button">
+        <Parent guid="guidClaudeCodeCmdSet" id="EditorContextGroup" />
+        <Strings>
+          <ButtonText>Add Selection to Claude</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidClaudeCodeCmdSet" id="cmdidAcceptDiff" priority="0x0300" type="Button">
+        <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
+        <Strings>
+          <ButtonText>Accept Claude Edit</ButtonText>
+        </Strings>
+      </Button>
+
+      <Button guid="guidClaudeCodeCmdSet" id="cmdidRejectDiff" priority="0x0310" type="Button">
+        <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
+        <Strings>
+          <ButtonText>Reject Claude Edit</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <KeyBindings>
+    <KeyBinding guid="guidClaudeCodeCmdSet" id="cmdidAddSelectionToClaude" editor="guidVSStd97"
+                key1="K" mod1="Control Alt" />
+    <KeyBinding guid="guidClaudeCodeCmdSet" id="cmdidAcceptDiff" editor="guidVSStd97"
+                key1="Y" mod1="Control Alt" />
+    <KeyBinding guid="guidClaudeCodeCmdSet" id="cmdidRejectDiff" editor="guidVSStd97"
+                key1="N" mod1="Control Alt" />
+  </KeyBindings>
+
+  <Symbols>
+    <GuidSymbol name="guidClaudeCodePackage" value="{8b1e8a27-4a7a-4c9e-9c0a-4c7f9e3b1d01}" />
+    <GuidSymbol name="guidClaudeCodeCmdSet" value="{8b1e8a27-4a7a-4c9e-9c0a-4c7f9e3b1d03}">
+      <IDSymbol name="MainMenuGroup" value="0x1020" />
+      <IDSymbol name="EditorContextGroup" value="0x1021" />
+      <IDSymbol name="cmdidOpenToolWindow" value="0x0100" />
+      <IDSymbol name="cmdidAddSelectionToClaude" value="0x0101" />
+      <IDSymbol name="cmdidOpenTerminalWithClaude" value="0x0102" />
+      <IDSymbol name="cmdidAcceptDiff" value="0x0103" />
+      <IDSymbol name="cmdidRejectDiff" value="0x0104" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
