@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
@@ -9,7 +10,7 @@ namespace ClaudeCodeVS.Ide
     internal sealed class SelectionTracker : IVsTextManagerEvents, IDisposable
     {
         private readonly IdeServices _ide;
-        private uint _cookie;
+        private int _cookie;
         private readonly SynchronizationContext _uiContext;
         private Timer _debounce;
         private SelectionSnapshot _latest;

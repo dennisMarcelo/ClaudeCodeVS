@@ -17,6 +17,7 @@
       <Button guid="guidClaudeCodeCmdSet" id="cmdidOpenToolWindow" priority="0x0100" type="Button">
         <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
         <Strings>
+          <CommandName>cmdidOpenToolWindow</CommandName>
           <ButtonText>Open Claude Code Panel</ButtonText>
         </Strings>
       </Button>
@@ -24,6 +25,7 @@
       <Button guid="guidClaudeCodeCmdSet" id="cmdidOpenTerminalWithClaude" priority="0x0110" type="Button">
         <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
         <Strings>
+          <CommandName>cmdidOpenTerminalWithClaude</CommandName>
           <ButtonText>Start Claude Code in Terminal</ButtonText>
         </Strings>
       </Button>
@@ -31,6 +33,7 @@
       <Button guid="guidClaudeCodeCmdSet" id="cmdidAddSelectionToClaude" priority="0x0200" type="Button">
         <Parent guid="guidClaudeCodeCmdSet" id="EditorContextGroup" />
         <Strings>
+          <CommandName>cmdidAddSelectionToClaude</CommandName>
           <ButtonText>Add Selection to Claude</ButtonText>
         </Strings>
       </Button>
@@ -38,6 +41,7 @@
       <Button guid="guidClaudeCodeCmdSet" id="cmdidAcceptDiff" priority="0x0300" type="Button">
         <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
         <Strings>
+          <CommandName>cmdidAcceptDiff</CommandName>
           <ButtonText>Accept Claude Edit</ButtonText>
         </Strings>
       </Button>
@@ -45,6 +49,7 @@
       <Button guid="guidClaudeCodeCmdSet" id="cmdidRejectDiff" priority="0x0310" type="Button">
         <Parent guid="guidClaudeCodeCmdSet" id="MainMenuGroup" />
         <Strings>
+          <CommandName>cmdidRejectDiff</CommandName>
           <ButtonText>Reject Claude Edit</ButtonText>
         </Strings>
       </Button>

@@ -31,10 +31,10 @@ namespace ClaudeCodeVS
 
         public static VsixPackage Instance { get; private set; }
 
-        public McpWebSocketServer Server => _server;
-        public IdeServices Ide => _ide;
-        public SelectionTracker SelectionTracker => _selectionTracker;
-        public DiffCoordinator DiffCoordinator => _diffCoordinator;
+        internal McpWebSocketServer Server => _server;
+        internal IdeServices Ide => _ide;
+        internal SelectionTracker SelectionTracker => _selectionTracker;
+        internal DiffCoordinator DiffCoordinator => _diffCoordinator;
 
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
