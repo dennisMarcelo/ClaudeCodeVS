@@ -13,7 +13,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public CloseAllDiffTabsTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "close_all_diff_tabs";
+        public string Name => "closeAllDiffTabs";
         public string Description => "Closes all diff comparison tabs opened by Claude.";
         public JObject InputSchema => new JObject
         {

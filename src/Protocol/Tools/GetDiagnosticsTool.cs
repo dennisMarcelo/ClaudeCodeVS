@@ -15,7 +15,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public GetDiagnosticsTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "get_diagnostics";
+        public string Name => "getDiagnostics";
         public string Description => "Returns diagnostics (errors/warnings) from the Visual Studio Error List, optionally filtered to one file.";
         public JObject InputSchema => new JObject
         {

@@ -10,7 +10,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly SelectionTracker _tracker;
         public GetLatestSelectionTool(SelectionTracker tracker) { _tracker = tracker; }
 
-        public string Name => "get_latest_selection";
+        public string Name => "getLatestSelection";
         public string Description => "Returns the most recent non-empty selection observed by the selection tracker.";
         public JObject InputSchema => new JObject
         {

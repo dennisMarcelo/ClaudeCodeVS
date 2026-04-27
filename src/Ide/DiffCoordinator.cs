@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using ClaudeCodeVS.Diagnostics;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
@@ -57,12 +58,14 @@ namespace ClaudeCodeVS.Ide
             }
             catch (Exception ex)
             {
+                Logger.Error("DiffCoordinator", "OpenComparisonWindow2 failed for " + (oldPath ?? newPath), ex);
                 CleanupTemp(pending);
                 _pending.TryRemove(key, out _);
                 tcs.TrySetException(ex);
             }
 
             pending.Key = key;
+            Logger.Info("DiffCoordinator", "Opened diff (key=" + key + ", target=" + (newPath ?? oldPath) + ").");
             return await tcs.Task.ConfigureAwait(false);
         }
 
@@ -98,10 +101,12 @@ namespace ClaudeCodeVS.Ide
                     if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
                     File.WriteAllText(target, pending.NewContents ?? "");
                 }
+                Logger.Info("DiffCoordinator", "Accepted diff (key=" + key + ", saved=" + target + ").");
                 pending.Tcs.TrySetResult(new DiffResult { Status = "FILE_SAVED", SavedPath = target, Contents = pending.NewContents });
             }
             catch (Exception ex)
             {
+                Logger.Error("DiffCoordinator", "Accept failed for key=" + key, ex);
                 pending.Tcs.TrySetException(ex);
             }
             finally
@@ -113,6 +118,7 @@ namespace ClaudeCodeVS.Ide
         public void Reject(string key)
         {
             if (!_pending.TryRemove(key, out var pending)) return;
+            Logger.Info("DiffCoordinator", "Rejected diff (key=" + key + ").");
             pending.Tcs.TrySetResult(new DiffResult { Status = "DIFF_REJECTED" });
             CleanupTemp(pending);
         }

@@ -13,7 +13,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public CloseTabTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "close_tab";
+        public string Name => "closeTab";
         public string Description => "Closes an open editor tab by file path.";
         public JObject InputSchema => new JObject
         {

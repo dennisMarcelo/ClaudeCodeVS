@@ -4,6 +4,7 @@ using System.Threading;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using ClaudeCodeVS.Commands;
+using ClaudeCodeVS.Diagnostics;
 using ClaudeCodeVS.Ide;
 using ClaudeCodeVS.Protocol;
 using ClaudeCodeVS.Protocol.Tools;
@@ -23,6 +24,7 @@ namespace ClaudeCodeVS
     {
         private IdeServices _ide;
         private SelectionTracker _selectionTracker;
+        private SolutionTracker _solutionTracker;
         private DiffCoordinator _diffCoordinator;
         private LockFileManager _lockFile;
         private McpWebSocketServer _server;
@@ -42,31 +44,49 @@ namespace ClaudeCodeVS
 
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            _ide = await IdeServices.CreateAsync(this, cancellationToken);
-            _selectionTracker = new SelectionTracker(_ide);
-            _diffCoordinator = new DiffCoordinator(_ide);
+            await Logger.InitAsync(this, cancellationToken);
+            Logger.Info("Package", "Initializing ClaudeCodeVS extension.");
 
-            _tools = new ToolRegistry();
-            _tools.RegisterDefaults(_ide, _selectionTracker, _diffCoordinator);
+            try
+            {
+                _ide = await IdeServices.CreateAsync(this, cancellationToken);
+                _selectionTracker = new SelectionTracker(_ide);
+                _diffCoordinator = new DiffCoordinator(_ide);
 
-            _dispatcher = new JsonRpcDispatcher(_tools);
+                _tools = new ToolRegistry();
+                _tools.RegisterDefaults(_ide, _selectionTracker, _diffCoordinator);
 
-            var token = AuthToken.Generate();
-            _server = new McpWebSocketServer(token, _dispatcher);
-            int port = await _server.StartAsync(cancellationToken);
+                _dispatcher = new JsonRpcDispatcher(_tools);
 
-            _selectionTracker.SelectionChanged += OnSelectionChanged;
+                var token = AuthToken.Generate();
+                _server = new McpWebSocketServer(token, _dispatcher);
+                int port = await _server.StartAsync(cancellationToken);
+                Logger.Info("Package", "MCP WebSocket server bound on 127.0.0.1:" + port + ".");
 
-            _lockFile = new LockFileManager();
-            await _lockFile.WriteAsync(port, token, _ide.GetWorkspaceFolders(), "Visual Studio 2022", cancellationToken);
+                _selectionTracker.SelectionChanged += OnSelectionChanged;
 
-            await OpenToolWindowCommand.InitializeAsync(this);
-            await AddSelectionToClaudeCommand.InitializeAsync(this);
-            await OpenTerminalWithClaudeCommand.InitializeAsync(this, port, token);
-            await AcceptDiffCommand.InitializeAsync(this);
-            await RejectDiffCommand.InitializeAsync(this);
+                LockFileManager.SweepStale();
 
-            await base.InitializeAsync(cancellationToken, progress);
+                _lockFile = new LockFileManager();
+                await _lockFile.WriteAsync(port, token, _ide.GetWorkspaceFolders(), "Visual Studio 2022", cancellationToken);
+                Logger.Info("Package", "Lock file written: " + _lockFile.Path);
+
+                _solutionTracker = new SolutionTracker(_ide, _lockFile);
+
+                await OpenToolWindowCommand.InitializeAsync(this);
+                await AddSelectionToClaudeCommand.InitializeAsync(this);
+                await OpenTerminalWithClaudeCommand.InitializeAsync(this, port, token);
+                await AcceptDiffCommand.InitializeAsync(this);
+                await RejectDiffCommand.InitializeAsync(this);
+
+                await base.InitializeAsync(cancellationToken, progress);
+                Logger.Info("Package", "Extension initialization complete.");
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Package", "InitializeAsync failed", ex);
+                throw;
+            }
         }
 
         private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -77,15 +97,15 @@ namespace ClaudeCodeVS
         protected override int QueryClose(out bool canClose)
         {
             canClose = true;
-            try
-            {
-                _server?.Stop();
-                _lockFile?.Delete();
-                _selectionTracker?.Dispose();
-            }
-            catch
-            {
-            }
+            Logger.Info("Package", "Shutting down extension.");
+            try { _solutionTracker?.Dispose(); }
+            catch (Exception ex) { Logger.Error("Package", "SolutionTracker dispose failed", ex); }
+            try { _server?.Stop(); }
+            catch (Exception ex) { Logger.Error("Package", "Server stop failed", ex); }
+            try { _lockFile?.Delete(); }
+            catch (Exception ex) { Logger.Error("Package", "Lock file delete failed", ex); }
+            try { _selectionTracker?.Dispose(); }
+            catch (Exception ex) { Logger.Error("Package", "SelectionTracker dispose failed", ex); }
             return Microsoft.VisualStudio.VSConstants.S_OK;
         }
     }

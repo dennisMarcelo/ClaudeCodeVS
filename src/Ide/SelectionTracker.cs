@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
+using ClaudeCodeVS.Diagnostics;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 using Newtonsoft.Json.Linq;
@@ -54,7 +55,10 @@ namespace ClaudeCodeVS.Ide
                 _latest = snap;
                 SelectionChanged?.Invoke(this, new SelectionChangedEventArgs(snap));
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Logger.Error("SelectionTracker", "Debounced selection capture failed", ex);
+            }
         }
 
         public void Poke()

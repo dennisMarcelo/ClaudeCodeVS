@@ -15,7 +15,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public OpenFileTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "open_file";
+        public string Name => "openFile";
         public string Description => "Opens a file in Visual Studio. Optionally selects a line range and preview-opens the file.";
         public JObject InputSchema => new JObject
         {

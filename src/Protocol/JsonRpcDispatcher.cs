@@ -1,7 +1,7 @@
 using System;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using ClaudeCodeVS.Diagnostics;
 using ClaudeCodeVS.Protocol.Tools;
 using Newtonsoft.Json.Linq;
 
@@ -24,7 +24,11 @@ namespace ClaudeCodeVS.Protocol
         {
             JObject req;
             try { req = JObject.Parse(raw); }
-            catch (Exception) { return null; }
+            catch (Exception ex)
+            {
+                Logger.Warn("Dispatcher", "Failed to parse incoming JSON: " + ex.Message);
+                return null;
+            }
 
             string method = (string)req["method"];
             JToken id = req["id"];
@@ -43,11 +47,12 @@ namespace ClaudeCodeVS.Protocol
             }
             catch (McpErrorException mex)
             {
+                Logger.Warn("Dispatcher", "MCP error in " + method + " (code=" + mex.Code + "): " + mex.Message);
                 return BuildResponse(id, null, new JObject { ["code"] = mex.Code, ["message"] = mex.Message });
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("[ClaudeCodeVS] method " + method + " threw: " + ex);
+                Logger.Error("Dispatcher", "Method " + method + " threw", ex);
                 return BuildResponse(id, null, new JObject { ["code"] = -32603, ["message"] = ex.Message });
             }
         }

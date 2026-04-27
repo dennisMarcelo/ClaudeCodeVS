@@ -13,7 +13,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public CheckDocumentDirtyTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "check_document_dirty";
+        public string Name => "checkDocumentDirty";
         public string Description => "Returns whether a document has unsaved changes.";
         public JObject InputSchema => new JObject
         {

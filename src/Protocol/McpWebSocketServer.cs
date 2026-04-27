@@ -1,13 +1,14 @@
+using ClaudeCodeVS.Diagnostics;
+using Microsoft.Build.Framework;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace ClaudeCodeVS.Protocol
 {
@@ -87,10 +88,13 @@ namespace ClaudeCodeVS.Protocol
 
         private async Task HandleRequestAsync(HttpListenerContext ctx, CancellationToken ct)
         {
+            string remote = null;
+            try { remote = ctx.Request.RemoteEndPoint?.ToString(); } catch { }
             try
             {
                 if (!ctx.Request.IsWebSocketRequest)
                 {
+                    Logger.Warn("Server", "Rejecting non-WebSocket request from " + remote + " (HTTP 400).");
                     ctx.Response.StatusCode = 400;
                     ctx.Response.Close();
                     return;
@@ -99,14 +103,33 @@ namespace ClaudeCodeVS.Protocol
                 string provided = ctx.Request.Headers[AuthHeader];
                 if (string.IsNullOrEmpty(provided) || !AuthToken.ConstantTimeEquals(provided, _authToken))
                 {
+                    Logger.Warn("Server", "Auth rejected for " + remote + ": " + (string.IsNullOrEmpty(provided) ? "missing header" : "invalid token") + " (HTTP 401).");
                     ctx.Response.StatusCode = 401;
                     ctx.Response.Close();
                     return;
                 }
 
-                var wsCtx = await ctx.AcceptWebSocketAsync(null).ConfigureAwait(false);
+                string requestedProtocols = ctx.Request.Headers["Sec-WebSocket-Protocol"];
+                string acceptedProtocol = null;
+                if (!string.IsNullOrEmpty(requestedProtocols))
+                {
+                    foreach (var p in requestedProtocols.Split(','))
+                    {
+                        var trimmed = p.Trim();
+                        if (!string.IsNullOrEmpty(trimmed))
+                        {
+                            acceptedProtocol = trimmed;
+                            break;
+                        }
+                    }
+                }
+
+                Logger.Info("Server", "Upgrade headers: UA='" + ctx.Request.UserAgent + "' Origin='" + ctx.Request.Headers["Origin"] + "' Subprotocols='" + requestedProtocols + "' -> echoing='" + acceptedProtocol + "'");
+
+                var wsCtx = await ctx.AcceptWebSocketAsync(acceptedProtocol).ConfigureAwait(false);
                 var session = new ClientSession(wsCtx.WebSocket);
                 _clients[session.Id] = session;
+                Logger.Info("Server", "Client connected: " + remote + " (sessions=" + _clients.Count + ", subprotocol='" + acceptedProtocol + "').");
                 RaiseClientCountChanged();
 
                 try
@@ -116,13 +139,14 @@ namespace ClaudeCodeVS.Protocol
                 finally
                 {
                     _clients.TryRemove(session.Id, out _);
+                    Logger.Info("Server", "Client disconnected: " + remote + " (sessions=" + _clients.Count + ").");
                     RaiseClientCountChanged();
                     try { session.Socket.Dispose(); } catch { }
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("[ClaudeCodeVS] request error: " + ex);
+                Logger.Error("Server", "Request handler failed for " + remote, ex);
             }
         }
 
@@ -138,8 +162,26 @@ namespace ClaudeCodeVS.Protocol
                 {
                     result = await session.Socket.ReceiveAsync(new ArraySegment<byte>(buffer), ct).ConfigureAwait(false);
                 }
-                catch (WebSocketException) { break; }
-                catch (OperationCanceledException) { break; }
+                catch (WebSocketException ex)
+                {
+                    if (ex.WebSocketErrorCode == WebSocketError.ConnectionClosedPrematurely)
+                    {
+                        Logger.Info("Server", "Client closed connection abruptly (no close frame).");
+                    }
+                    else
+                    {
+                        string inner = ex.InnerException == null
+                            ? "(no inner)"
+                            : ex.InnerException.GetType().Name + ": " + ex.InnerException.Message + (ex.InnerException.InnerException != null ? " <- " + ex.InnerException.InnerException.GetType().Name + ": " + ex.InnerException.InnerException.Message : "");
+                        Logger.Warn("Server", "WebSocket receive ended: " + ex.WebSocketErrorCode + " :: " + ex.Message + " :: inner=" + inner);
+                    }
+                    break;
+                }
+                catch (OperationCanceledException)
+                {
+                    Logger.Info("Server", "Session canceled (server stopping).");
+                    break;
+                }
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -153,6 +195,8 @@ namespace ClaudeCodeVS.Protocol
                 string message = builder.ToString();
                 builder.Clear();
 
+                Logger.Info("Server", "<- recv (" + message.Length + " bytes): " + Preview(message));
+
                 _ = Task.Run(async () =>
                 {
                     try
@@ -160,12 +204,17 @@ namespace ClaudeCodeVS.Protocol
                         string response = await _dispatcher.HandleAsync(message, session).ConfigureAwait(false);
                         if (!string.IsNullOrEmpty(response))
                         {
+                            Logger.Info("Server", "-> send (" + response.Length + " bytes): " + Preview(response));
                             await session.SendAsync(response, CancellationToken.None).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            Logger.Info("Server", "(no response — notification or parse failure)");
                         }
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine("[ClaudeCodeVS] dispatch error: " + ex);
+                        Logger.Error("Server", "Dispatch error", ex);
                     }
                 });
             }
@@ -197,6 +246,13 @@ namespace ClaudeCodeVS.Protocol
                 try { kv.Value.Socket.Abort(); } catch { }
             }
             _clients.Clear();
+        }
+
+        private static string Preview(string s)
+        {
+            if (s == null) return "";
+            const int max = 240;
+            return s.Length <= max ? s : s.Substring(0, max) + "…(+" + (s.Length - max) + ")";
         }
 
         private void RaiseClientCountChanged()

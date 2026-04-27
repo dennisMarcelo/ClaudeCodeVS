@@ -3,6 +3,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using ClaudeCodeVS.Diagnostics;
 using ClaudeCodeVS.Protocol;
 using Microsoft.VisualStudio.Shell;
 using Task = System.Threading.Tasks.Task;
@@ -36,19 +37,21 @@ namespace ClaudeCodeVS.Commands
                 var psi = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = "/K claude",
+                    Arguments = "/c start \"Claude Code\" cmd.exe /K claude",
                     WorkingDirectory = workdir,
-                    UseShellExecute = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
                 };
                 psi.EnvironmentVariables["CLAUDE_CODE_SSE_PORT"] = _port.ToString();
                 psi.EnvironmentVariables["CLAUDECODE"] = "1";
                 psi.EnvironmentVariables["ENABLE_IDE_INTEGRATION"] = "true";
 
                 Process.Start(psi);
+                Logger.Info("OpenTerminal", "Started 'cmd /K claude' in " + workdir + " on port " + _port + ".");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("[ClaudeCodeVS] OpenTerminalWithClaude failed: " + ex);
+                Logger.Error("OpenTerminal", "Failed to start terminal", ex);
             }
         }
     }

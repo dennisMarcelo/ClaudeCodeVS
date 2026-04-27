@@ -12,7 +12,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public GetOpenEditorsTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "get_open_editors";
+        public string Name => "getOpenEditors";
         public string Description => "Returns the list of currently open editor tabs in Visual Studio.";
         public JObject InputSchema => new JObject
         {

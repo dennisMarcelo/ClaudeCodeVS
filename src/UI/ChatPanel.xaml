@@ -11,6 +11,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -37,24 +38,46 @@
             <Button Name="CopyEnvButton" Content="Copy env-var setup" Padding="10,4" Margin="8,0,0,0" Click="OnCopyEnv" />
         </StackPanel>
 
-        <ScrollViewer Grid.Row="4" Margin="0,16,0,0" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock FontWeight="SemiBold" Text="How to use" />
-                <TextBlock TextWrapping="Wrap" Margin="0,6,0,0">
-                    1. Click <Bold>Start Claude in terminal</Bold> — opens a terminal with the CLI already
-                    connected to this IDE.<LineBreak />
-                    2. Or, from any external terminal, run <Bold>claude</Bold>. If this extension is active
-                    the CLI discovers it automatically via the lock file. You can also force it with
-                    <Bold>claude /ide</Bold>.<LineBreak />
-                    3. Select code in the editor and press <Bold>Ctrl+Alt+K</Bold> to send it as
-                    <Bold>@-mention</Bold> context to Claude.<LineBreak />
-                    4. When Claude proposes an edit, Visual Studio opens a diff view. Use
-                    <Bold>Ctrl+Alt+Y</Bold> to accept or <Bold>Ctrl+Alt+N</Bold> to reject.
-                </TextBlock>
-            </StackPanel>
-        </ScrollViewer>
+        <StackPanel Grid.Row="4" Margin="0,16,0,0">
+            <TextBlock FontWeight="SemiBold" Text="How to use" />
+            <TextBlock TextWrapping="Wrap" Margin="0,6,0,0">
+                1. Click <Bold>Start Claude in terminal</Bold> — opens a terminal with the CLI already
+                connected to this IDE.<LineBreak />
+                2. Or, from any external terminal, run <Bold>claude</Bold>. If this extension is active
+                the CLI discovers it automatically via the lock file. You can also force it with
+                <Bold>claude /ide</Bold>.<LineBreak />
+                3. Select code in the editor and press <Bold>Ctrl+Alt+K</Bold> to send it as
+                <Bold>@-mention</Bold> context to Claude.<LineBreak />
+                4. When Claude proposes an edit, Visual Studio opens a diff view. Use
+                <Bold>Ctrl+Alt+Y</Bold> to accept or <Bold>Ctrl+Alt+N</Bold> to reject.
+            </TextBlock>
+        </StackPanel>
 
-        <TextBlock Grid.Row="5" Margin="0,12,0,0" Opacity="0.6" FontSize="11"
+        <Border Grid.Row="5" Margin="0,16,0,0" Padding="8"
+                BorderBrush="{DynamicResource {x:Static vsshell:VsBrushes.PanelBorderKey}}"
+                BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DockPanel Grid.Row="0" LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Left" FontWeight="SemiBold" Text="Recent events" VerticalAlignment="Center" />
+                    <Button DockPanel.Dock="Right" Name="OpenLogFileButton" Content="Open log file" Padding="8,2" Click="OnOpenLogFile" />
+                    <TextBlock DockPanel.Dock="Right" Name="LogFilePathText" Margin="0,0,8,0" Opacity="0.6" FontSize="11"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Text="" />
+                </DockPanel>
+                <TextBox Grid.Row="1" Name="EventsText" Margin="0,8,0,0"
+                         IsReadOnly="True" IsReadOnlyCaretVisible="False"
+                         FontFamily="Consolas" FontSize="11"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap"
+                         Background="{DynamicResource {x:Static vsshell:VsBrushes.WindowKey}}"
+                         Foreground="{DynamicResource {x:Static vsshell:VsBrushes.WindowTextKey}}" />
+            </Grid>
+        </Border>
+
+        <TextBlock Grid.Row="6" Margin="0,12,0,0" Opacity="0.6" FontSize="11"
                    Text="Claude Code speaks MCP 2024-11-05 over WebSocket on 127.0.0.1." />
     </Grid>
 </UserControl>

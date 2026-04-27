@@ -13,7 +13,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public SaveDocumentTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "save_document";
+        public string Name => "saveDocument";
         public string Description => "Saves an open document by file path.";
         public JObject InputSchema => new JObject
         {

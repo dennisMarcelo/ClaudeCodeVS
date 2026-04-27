@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using ClaudeCodeVS.Diagnostics;
 using Newtonsoft.Json;
 
 namespace ClaudeCodeVS.Protocol
@@ -56,7 +57,7 @@ namespace ClaudeCodeVS.Protocol
             File.Move(tmp, _path);
         }
 
-        public void UpdateWorkspaceFolders(string[] folders, string authToken, string ideName)
+        public void UpdateWorkspaceFolders(string[] folders)
         {
             if (string.IsNullOrEmpty(_path) || !File.Exists(_path)) return;
             try
@@ -66,8 +67,9 @@ namespace ClaudeCodeVS.Protocol
                 obj.workspaceFolders = Newtonsoft.Json.Linq.JArray.FromObject(folders ?? Array.Empty<string>());
                 File.WriteAllText(_path, JsonConvert.SerializeObject(obj, Formatting.Indented));
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error("LockFile", "UpdateWorkspaceFolders failed for " + _path, ex);
             }
         }
 
@@ -78,10 +80,12 @@ namespace ClaudeCodeVS.Protocol
                 if (!string.IsNullOrEmpty(_path) && File.Exists(_path))
                 {
                     File.Delete(_path);
+                    Logger.Info("LockFile", "Deleted lock file: " + _path);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error("LockFile", "Failed to delete lock file " + _path, ex);
             }
         }
 
@@ -104,15 +108,18 @@ namespace ClaudeCodeVS.Protocol
                         catch (ArgumentException)
                         {
                             File.Delete(file);
+                            Logger.Info("LockFile", "Swept stale lock file (pid " + pid + " gone): " + file);
                         }
                     }
-                    catch
+                    catch (Exception innerEx)
                     {
+                        Logger.Warn("LockFile", "Could not parse/sweep " + file + ": " + innerEx.Message);
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                Logger.Error("LockFile", "SweepStale failed", ex);
             }
         }
     }

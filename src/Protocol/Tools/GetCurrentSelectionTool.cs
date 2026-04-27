@@ -11,7 +11,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public GetCurrentSelectionTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "get_current_selection";
+        public string Name => "getCurrentSelection";
         public string Description => "Returns the text currently selected in the active editor, with file path and line/column range.";
         public JObject InputSchema => new JObject
         {

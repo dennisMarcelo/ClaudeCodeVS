@@ -10,7 +10,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly DiffCoordinator _diff;
         public OpenDiffTool(DiffCoordinator diff) { _diff = diff; }
 
-        public string Name => "open_diff";
+        public string Name => "openDiff";
         public string Description => "Opens a side-by-side diff in Visual Studio and blocks until the user accepts or rejects the change.";
         public JObject InputSchema => new JObject
         {

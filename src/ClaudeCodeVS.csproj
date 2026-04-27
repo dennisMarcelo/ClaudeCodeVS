@@ -61,8 +61,10 @@
   <ItemGroup>
     <Compile Include="VsixPackage.cs" />
     <Compile Include="PackageIds.cs" />
+    <Compile Include="Diagnostics\Logger.cs" />
     <Compile Include="Ide\IdeServices.cs" />
     <Compile Include="Ide\SelectionTracker.cs" />
+    <Compile Include="Ide\SolutionTracker.cs" />
     <Compile Include="Ide\DiffCoordinator.cs" />
     <Compile Include="Protocol\AuthToken.cs" />
     <Compile Include="Protocol\LockFileManager.cs" />

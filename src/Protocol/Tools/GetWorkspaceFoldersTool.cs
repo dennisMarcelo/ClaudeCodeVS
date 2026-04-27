@@ -10,7 +10,7 @@ namespace ClaudeCodeVS.Protocol.Tools
         private readonly IdeServices _ide;
         public GetWorkspaceFoldersTool(IdeServices ide) { _ide = ide; }
 
-        public string Name => "get_workspace_folders";
+        public string Name => "getWorkspaceFolders";
         public string Description => "Returns workspace folders (solution directory and project directories) open in Visual Studio.";
         public JObject InputSchema => new JObject
         {
